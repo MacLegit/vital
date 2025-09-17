@@ -1,93 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Vital 💌</title>
-<style>
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
-  body {
-    background: #0f0f0f;
-    color: #fff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
-  h1 {
-    margin-top: 40px;
-    font-size: 2.5rem;
-    color: #a64ca6;
-    text-align: center;
-  }
-  textarea {
-    width: 90%;
-    max-width: 400px;
-    height: 120px;
-    padding: 15px 20px;
-    border-radius: 25px;
-    border: 2px solid #a64ca6;
-    background: #1a1a1a;
-    color: #fff;
-    font-size: 18px;
-    margin-top: 25px;
-    outline: none;
-    transition: border-color 0.3s ease;
-    resize: none;
-  }
-  textarea:focus {
-    border-color: #fff;
-  }
-  button {
-    margin-top: 15px;
-    padding: 14px 35px;
-    font-size: 18px;
-    border: none;
-    border-radius: 30px;
-    background: #a64ca6;
-    color: #fff;
-    cursor: pointer;
-    opacity: 0.85;
-    transition: opacity 0.3s ease, transform 0.2s ease;
-  }
-  button:hover {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  #mensagensContainer {
-    margin-top: 40px;
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    align-items: center;
-  }
-  .mensagem {
-    background: #1a1a1a;
-    border-radius: 25px;
-    border-left: 6px solid #a64ca6;
-    padding: 18px 25px;
-    font-size: 16px;
-    max-width: 100%;
-    box-shadow: 0 5px 15px rgba(166, 76, 166, 0.6);
-    opacity: 0;
-    transform: translateY(-30px);
-    animation: abrirEnvelope 0.5s forwards;
-    word-break: break-word;
-    text-align: center;
-  }
-  @keyframes abrirEnvelope {
-    to {
-      opacity: 1;
-      transform: translateY(0);
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vital 💌</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
     }
-  }
-</style>
+    h1 {
+      margin-top: 40px;
+      font-size: 2.5rem;
+      color: #a64ca6;
+      text-align: center;
+    }
+    textarea {
+      width: 90%;
+      max-width: 400px;
+      height: 120px;
+      padding: 15px 20px;
+      border-radius: 25px;
+      border: 2px solid #a64ca6;
+      background: #1a1a1a;
+      color: #fff;
+      font-size: 18px;
+      margin-top: 25px;
+      outline: none;
+      transition: border-color 0.3s ease;
+      resize: none;
+    }
+    textarea:focus { border-color: #fff; }
+    button {
+      margin-top: 15px;
+      padding: 14px 35px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      background: #a64ca6;
+      color: #fff;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+    button:hover { opacity: 1; transform: scale(1.05); }
+    #mensagensContainer {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+    .mensagem {
+      background: #1a1a1a;
+      border-radius: 25px;
+      border-left: 6px solid #a64ca6;
+      padding: 18px 25px;
+      font-size: 16px;
+      max-width: 100%;
+      box-shadow: 0 5px 15px rgba(166, 76, 166, 0.6);
+      opacity: 0;
+      transform: translateY(-30px);
+      animation: abrirEnvelope 0.5s forwards;
+      word-break: break-word;
+      text-align: center;
+    }
+    @keyframes abrirEnvelope {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -98,53 +91,12 @@
 
 <div id="mensagensContainer"></div>
 
-<!-- Firebase SDK -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 
 <script>
-  // PWA Manifest - criado dinamicamente para facilitar deploy
-  const manifestJSON = {
-    "name": "Vital",
-    "short_name": "Vital",
-    "start_url": "./",
-    "display": "standalone",
-    "background_color": "#0f0f0f",
-    "theme_color": "#a64ca6",
-    "icons":[
-      {
-        "src": "https://i.imgur.com/7z1i4Hw.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      }
-    ]
-  };
-  const manifest = document.createElement('link');
-  manifest.rel = 'manifest';
-  manifest.href = URL.createObjectURL(new Blob([JSON.stringify(manifestJSON)], {type: 'application/json'}));
-  document.head.appendChild(manifest);
-
-  // Service Worker Inline
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register(URL.createObjectURL(new Blob([`
-      const CACHE_NAME = 'vital-cache-v1';
-      const urlsToCache = ['./'];
-
-      self.addEventListener('install', event => {
-        event.waitUntil(
-          caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-        );
-      });
-
-      self.addEventListener('fetch', event => {
-        event.respondWith(
-          caches.match(event.request).then(response => response || fetch(event.request))
-        );
-      });
-    `], {type: 'text/javascript'}))).then(() => console.log('Service Worker Vital registrado!'));
-  }
-
-  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCdvG19MnplrrKlfZdsx6VFIsdLkTHbP3o",
     authDomain: "vital-e22d5.firebaseapp.com",
@@ -157,20 +109,31 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
+  const messaging = firebase.messaging();
 
   const mensagensContainer = document.getElementById('mensagensContainer');
   const mensagemInput = document.getElementById('mensagemInput');
   const btnEnviar = document.getElementById('btnEnviar');
 
-  // Fila para mensagens offline
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      messaging.getToken({
+        vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
+      }).then(currentToken => {
+        console.log('Token de notificação:', currentToken);
+        // Você pode salvar esse token no Firebase para enviar notificações direcionadas
+      }).catch(err => console.error('Erro ao obter token:', err));
+    }
+  });
+
+  messaging.onMessage(payload => {
+    console.log('Mensagem recebida:', payload);
+    const texto = payload.notification?.body || 'Nova mensagem!';
+    mostrarMensagem(texto);
+  });
+
   let filaOffline = [];
 
-  // Pedir permissão notificação
-  if('Notification' in window){
-    Notification.requestPermission();
-  }
-
-  // Função para mostrar mensagem na tela
   function mostrarMensagem(texto){
     const div = document.createElement('div');
     div.className = 'mensagem';
@@ -178,13 +141,11 @@
     mensagensContainer.appendChild(div);
     div.scrollIntoView({behavior: 'smooth'});
 
-    // Notificação
     if(Notification.permission === 'granted'){
       new Notification('Nova mensagem 💜', {body: texto});
     }
   }
 
-  // Enviar mensagem
   btnEnviar.addEventListener('click', () => {
     const texto = mensagemInput.value.trim();
     if(!texto) return;
@@ -200,13 +161,11 @@
     mensagemInput.value = '';
   });
 
-  // Ao voltar online, enviar mensagens pendentes
   window.addEventListener('online', () => {
     filaOffline.forEach(msg => db.ref('mensagens').push(msg));
     filaOffline = [];
   });
 
-  // Ouvir mensagens do Firebase em tempo real
   db.ref('mensagens').on('child_added', snapshot => {
     const msg = snapshot.val();
     const agora = Date.now();
@@ -216,6 +175,13 @@
       mostrarMensagem(msg.texto);
     }
   });
+
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('firebase-messaging-sw.js')
+      .then(reg => console.log('Service Worker registrado ✅'))
+      .catch(err => console.error('Erro SW:', err));
+  }
 </script>
 
 </body>
