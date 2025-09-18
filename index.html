@@ -102,19 +102,6 @@
     @keyframes abrirEnvelope {
       to { opacity: 1; transform: translateY(0); }
     }
-
-    /* Botão secundário menor para notificações */
-    #btnNotificacoes {
-      background-color: #5e2e5e;
-      margin-top: 10px;
-      padding: 12px 30px;
-      font-size: 16px;
-    }
-
-    #btnNotificacoes:hover {
-      background-color: #7a3a7a;
-      transform: scale(1.05);
-    }
   </style>
 </head>
 <body>
@@ -123,7 +110,6 @@
 
 <textarea id="mensagemInput" placeholder="Escreva sua mensagem..."></textarea>
 <button id="btnEnviar">Enviar</button>
-<button id="btnNotificacoes">Ativar Notificações</button>
 
 <div id="mensagensContainer"></div>
 
@@ -150,25 +136,10 @@ const messaging = firebase.messaging();
 const mensagensContainer = document.getElementById('mensagensContainer');
 const mensagemInput = document.getElementById('mensagemInput');
 const btnEnviar = document.getElementById('btnEnviar');
-const btnNotificacoes = document.getElementById('btnNotificacoes');
 
 let filaOffline = [];
 
-// Ativar notificações apenas para o dispositivo atual
-btnNotificacoes.addEventListener('click', () => {
-  Notification.requestPermission().then(permission => {
-    if(permission === 'granted'){
-      messaging.getToken({
-        vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
-      }).then(token => {
-        console.log('Token local:', token);
-        alert('Notificações ativadas ✅ (somente neste dispositivo)');
-      }).catch(err => console.error(err));
-    } else alert('Permissão negada ❌');
-  });
-});
-
-// Mostrar mensagem no container
+// Mostrar mensagem no container e notificação local
 function mostrarMensagem(texto){
   const div = document.createElement('div');
   div.className = 'mensagem';
