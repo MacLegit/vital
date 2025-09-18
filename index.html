@@ -88,6 +88,7 @@
 
 <textarea id="mensagemInput" placeholder="Escreva sua mensagem..."></textarea>
 <button id="btnEnviar">Enviar</button>
+<button id="btnNotificacoes">Ativar Notificações</button>
 
 <div id="mensagensContainer"></div>
 
@@ -116,18 +117,25 @@
   const mensagensContainer = document.getElementById('mensagensContainer');
   const mensagemInput = document.getElementById('mensagemInput');
   const btnEnviar = document.getElementById('btnEnviar');
+  const btnNotificacoes = document.getElementById('btnNotificacoes');
   let filaOffline = [];
 
-  // Notificações Push
-  Notification.requestPermission().then(permission => {
-    if (permission === 'granted') {
-      messaging.getToken({
-        vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
-      }).then(token => console.log('Token de notificação:', token))
-        .catch(err => console.error('Erro ao obter token:', err));
-    }
+  // Ativar notificações via botão
+  btnNotificacoes.addEventListener('click', () => {
+    Notification.requestPermission().then(permission => {
+      if(permission === 'granted') {
+        alert('Notificações ativadas ✅');
+        messaging.getToken({
+          vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
+        }).then(token => console.log('Token do dispositivo:', token))
+          .catch(err => console.error('Erro ao obter token:', err));
+      } else {
+        alert('Permissão negada ❌');
+      }
+    });
   });
 
+  // Receber mensagens em primeiro plano
   messaging.onMessage(payload => {
     const texto = payload.notification?.body || 'Nova mensagem!';
     mostrarMensagem(texto);
@@ -145,6 +153,7 @@
     }
   }
 
+  // Enviar mensagem
   btnEnviar.addEventListener('click', () => {
     const texto = mensagemInput.value.trim();
     if(!texto) return;
@@ -159,23 +168,20 @@
     mensagemInput.value = '';
   });
 
+  // Sincronizar fila offline
   window.addEventListener('online', () => {
     filaOffline.forEach(msg => db.ref('mensagens').push(msg));
     filaOffline = [];
   });
 
+  // Receber mensagens do banco
   db.ref('mensagens').on('child_added', snapshot => {
     const msg = snapshot.val();
-    const agora = Date.now();
-    if(msg.timestamp > agora){
-      setTimeout(() => mostrarMensagem(msg.texto), msg.timestamp - agora);
-    } else {
-      mostrarMensagem(msg.texto);
-    }
+    mostrarMensagem(msg.texto);
   });
 
-  // Service Worker
-  if ('serviceWorker' in navigator) {
+  // Registrar Service Worker
+  if('serviceWorker' in navigator){
     navigator.serviceWorker.register('firebase-messaging-sw.js')
       .then(() => console.log('Service Worker registrado ✅'))
       .catch(err => console.error('Erro SW:', err));
