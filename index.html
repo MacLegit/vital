@@ -84,7 +84,7 @@
 </head>
 <body>
 
-<h1>Vital 💌</h1>
+<h1>Vital</h1>
 
 <textarea id="mensagemInput" placeholder="Escreva sua mensagem..."></textarea>
 <button id="btnEnviar">Enviar</button>
@@ -115,13 +115,13 @@
   const mensagemInput = document.getElementById('mensagemInput');
   const btnEnviar = document.getElementById('btnEnviar');
 
+  // Notificações Push
   Notification.requestPermission().then(permission => {
     if (permission === 'granted') {
       messaging.getToken({
         vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
       }).then(currentToken => {
         console.log('Token de notificação:', currentToken);
-        // Você pode salvar esse token no Firebase para enviar notificações direcionadas
       }).catch(err => console.error('Erro ao obter token:', err));
     }
   });
