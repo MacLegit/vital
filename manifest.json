@@ -1,0 +1,8 @@
+{
+  "name": "Vital 💌",
+  "short_name": "Vital",
+  "start_url": "/vital/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#a64ca6"
+}
