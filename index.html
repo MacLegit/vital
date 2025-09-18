@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vital </title>
+  <title>Vital 💌</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -97,6 +97,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 
 <script>
+  // Configuração Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCdvG19MnplrrKlfZdsx6VFIsdLkTHbP3o",
     authDomain: "vital-e22d5.firebaseapp.com",
@@ -107,6 +108,7 @@
     appId: "1:76460889955:web:8e82a93e29357d1a6ce556"
   };
 
+  // Inicialização Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
   const messaging = firebase.messaging();
@@ -114,25 +116,22 @@
   const mensagensContainer = document.getElementById('mensagensContainer');
   const mensagemInput = document.getElementById('mensagemInput');
   const btnEnviar = document.getElementById('btnEnviar');
+  let filaOffline = [];
 
   // Notificações Push
   Notification.requestPermission().then(permission => {
     if (permission === 'granted') {
       messaging.getToken({
         vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
-      }).then(currentToken => {
-        console.log('Token de notificação:', currentToken);
-      }).catch(err => console.error('Erro ao obter token:', err));
+      }).then(token => console.log('Token de notificação:', token))
+        .catch(err => console.error('Erro ao obter token:', err));
     }
   });
 
   messaging.onMessage(payload => {
-    console.log('Mensagem recebida:', payload);
     const texto = payload.notification?.body || 'Nova mensagem!';
     mostrarMensagem(texto);
   });
-
-  let filaOffline = [];
 
   function mostrarMensagem(texto){
     const div = document.createElement('div');
@@ -151,7 +150,6 @@
     if(!texto) return;
 
     const msg = { texto, timestamp: Date.now() };
-
     if(navigator.onLine){
       db.ref('mensagens').push(msg);
     } else {
@@ -179,11 +177,10 @@
   // Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('firebase-messaging-sw.js')
-      .then(reg => console.log('Service Worker registrado ✅'))
+      .then(() => console.log('Service Worker registrado ✅'))
       .catch(err => console.error('Erro SW:', err));
   }
 </script>
 
 </body>
 </html>
-
