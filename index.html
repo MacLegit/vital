@@ -6,8 +6,115 @@
   <title>Vital 💌</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#a64ca6">
+
   <style>
-    /* Seu CSS atual permanece aqui */
+    /* RESET */
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background-color: #0f0f0f;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #a64ca6;
+      margin-bottom: 30px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    textarea {
+      width: 90%;
+      max-width: 450px;
+      height: 140px;
+      padding: 20px 25px;
+      border-radius: 25px;
+      border: 2px solid #a64ca6;
+      background-color: #1a1a1a;
+      color: #fff;
+      font-size: 18px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+
+    textarea:focus {
+      border-color: #fff;
+      background-color: #2a2a2a;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 15px 40px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      background-color: #a64ca6;
+      color: #fff;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.3s ease, transform 0.2s ease;
+      font-weight: bold;
+    }
+
+    button:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    #mensagensContainer {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .mensagem {
+      background-color: #1a1a1a;
+      border-left: 6px solid #a64ca6;
+      border-radius: 25px;
+      padding: 20px 30px;
+      font-size: 16px;
+      max-width: 100%;
+      box-shadow: 0 5px 15px rgba(166,76,166,0.6);
+      opacity: 0;
+      transform: translateY(-30px);
+      animation: abrirEnvelope 0.5s forwards;
+      word-break: break-word;
+      text-align: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .mensagem:hover {
+      background-color: #2a2a2a;
+    }
+
+    @keyframes abrirEnvelope {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Botão secundário menor para notificações */
+    #btnNotificacoes {
+      background-color: #5e2e5e;
+      margin-top: 10px;
+      padding: 12px 30px;
+      font-size: 16px;
+    }
+
+    #btnNotificacoes:hover {
+      background-color: #7a3a7a;
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -26,85 +133,76 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCdvG19MnplrrKlfZdsx6VFIsdLkTHbP3o",
-    authDomain: "vital-e22d5.firebaseapp.com",
-    databaseURL: "https://vital-e22d5-default-rtdb.firebaseio.com",
-    projectId: "vital-e22d5",
-    storageBucket: "vital-e22d5.appspot.com",
-    messagingSenderId: "76460889955",
-    appId: "1:76460889955:web:8e82a93e29357d1a6ce556"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCdvG19MnplrrKlfZdsx6VFIsdLkTHbP3o",
+  authDomain: "vital-e22d5.firebaseapp.com",
+  databaseURL: "https://vital-e22d5-default-rtdb.firebaseio.com",
+  projectId: "vital-e22d5",
+  storageBucket: "vital-e22d5.appspot.com",
+  messagingSenderId: "76460889955",
+  appId: "1:76460889955:web:8e82a93e29357d1a6ce556"
+};
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const messaging = firebase.messaging();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const messaging = firebase.messaging();
 
-  const mensagensContainer = document.getElementById('mensagensContainer');
-  const mensagemInput = document.getElementById('mensagemInput');
-  const btnEnviar = document.getElementById('btnEnviar');
-  const btnNotificacoes = document.getElementById('btnNotificacoes');
-  let filaOffline = [];
+const mensagensContainer = document.getElementById('mensagensContainer');
+const mensagemInput = document.getElementById('mensagemInput');
+const btnEnviar = document.getElementById('btnEnviar');
+const btnNotificacoes = document.getElementById('btnNotificacoes');
 
-  // Ativar notificações
-  btnNotificacoes.addEventListener('click', () => {
-    Notification.requestPermission().then(permission => {
-      if(permission === 'granted') {
-        alert('Notificações ativadas ✅');
-        messaging.getToken({
-          vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
-        }).then(token => console.log('Token do dispositivo:', token))
-          .catch(err => console.error('Erro ao obter token:', err));
-      } else {
-        alert('Permissão negada ❌');
-      }
-    });
+let filaOffline = [];
+
+// Ativar notificações apenas para o dispositivo atual
+btnNotificacoes.addEventListener('click', () => {
+  Notification.requestPermission().then(permission => {
+    if(permission === 'granted'){
+      messaging.getToken({
+        vapidKey: "BE7fkACMxa1j4Zc9PoYq0Wz-sv01OkZZ3SHfjKbdWZYd2lUcoaFiKcOTnmGRN1wnqRPPbDsnRqiSlKZsoV50Pyk"
+      }).then(token => {
+        console.log('Token local:', token);
+        alert('Notificações ativadas ✅ (somente neste dispositivo)');
+      }).catch(err => console.error(err));
+    } else alert('Permissão negada ❌');
   });
+});
 
-  // Receber mensagens em primeiro plano
-  messaging.onMessage(payload => {
-    mostrarMensagem(payload.notification?.body || 'Nova mensagem!');
-  });
+// Mostrar mensagem no container
+function mostrarMensagem(texto){
+  const div = document.createElement('div');
+  div.className = 'mensagem';
+  div.textContent = texto;
+  mensagensContainer.appendChild(div);
+  div.scrollIntoView({behavior:'smooth'});
+  if(Notification.permission==='granted') new Notification('Nova mensagem 💜', {body:texto});
+}
 
-  function mostrarMensagem(texto){
-    const div = document.createElement('div');
-    div.className = 'mensagem';
-    div.textContent = texto;
-    mensagensContainer.appendChild(div);
-    div.scrollIntoView({behavior: 'smooth'});
-    if(Notification.permission === 'granted'){
-      new Notification('Nova mensagem 💜', {body: texto});
-    }
-  }
+// Enviar mensagem
+btnEnviar.addEventListener('click', () => {
+  const texto = mensagemInput.value.trim();
+  if(!texto) return;
+  const msg = { texto, timestamp: Date.now() };
+  if(navigator.onLine) db.ref('mensagens').push(msg);
+  else { filaOffline.push(msg); mostrarMensagem(texto); }
+  mensagemInput.value='';
+});
 
-  btnEnviar.addEventListener('click', () => {
-    const texto = mensagemInput.value.trim();
-    if(!texto) return;
-    const msg = { texto, timestamp: Date.now() };
-    if(navigator.onLine){
-      db.ref('mensagens').push(msg);
-    } else {
-      filaOffline.push(msg);
-      mostrarMensagem(texto);
-    }
-    mensagemInput.value = '';
-  });
+// Enviar fila offline
+window.addEventListener('online', () => {
+  filaOffline.forEach(msg => db.ref('mensagens').push(msg));
+  filaOffline=[];
+});
 
-  window.addEventListener('online', () => {
-    filaOffline.forEach(msg => db.ref('mensagens').push(msg));
-    filaOffline = [];
-  });
+// Receber mensagens em tempo real (somente exibição local)
+db.ref('mensagens').on('child_added', snapshot => mostrarMensagem(snapshot.val().texto));
 
-  db.ref('mensagens').on('child_added', snapshot => {
-    mostrarMensagem(snapshot.val().texto);
-  });
-
-  // Registrar service worker
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('firebase-messaging-sw.js')
-      .then(() => console.log('Service Worker registrado ✅'))
-      .catch(err => console.error('Erro SW:', err));
-  }
+// Registrar Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('firebase-messaging-sw.js')
+    .then(()=>console.log('Service Worker registrado ✅'))
+    .catch(err=>console.error('Erro SW:',err));
+}
 </script>
 
 </body>
